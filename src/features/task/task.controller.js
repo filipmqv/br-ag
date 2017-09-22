@@ -1,9 +1,9 @@
 'use strict';
 export default class TaskController {
-  constructor($http, $scope, $rootScope) {
-    this.$http = $http;
+  constructor($scope, $rootScope, dataGetter) {
     this.$scope = $scope;
     this.$rootScope = $rootScope;
+    this.dataGetter = dataGetter;
 
     this.$rootScope.$on('$translateChangeSuccess', (event, data) => {
       let newLang = data.language;
@@ -11,20 +11,24 @@ export default class TaskController {
       this.getData(newLang);
     });
 
+    // options for left list - conditions to accept or reject node drop
     this.leftTreeOptions = {
       accept: (sourceNodeScope, destNodesScope, destIndex) => {
         function isOutOfDepth(sourceNodeScope, destNodesScope) {
           return destNodesScope.outOfDepth(sourceNodeScope)
         }
+
         // check destNode
         function parentId(destNodesScope) {
           if (destNodesScope.$nodeScope && destNodesScope.$nodeScope.$modelValue)
              return destNodesScope.$nodeScope.$modelValue.id;
           return -1;
         }
+
         function isParentIdSameAsSourceId(sourceId, destNodesScope) {
           return parentId(destNodesScope) === sourceId;
         }
+
         // check recursively higher levels of parents (apart from direct destNde)
         function isNodeInAncestorsInner(sourceId, node) {
           if(node.$parentNodeScope) {
@@ -35,8 +39,9 @@ export default class TaskController {
             }
           }
         }
+
         function isNodeInAncestors(sourceId, destNodesScope) {
-          return isParentIdSameAsSourceId(sourceId, destNodesScope) || isNodeInAncestorsInner(sourceId, destNodesScope)
+          return isParentIdSameAsSourceId(sourceId, destNodesScope) || isNodeInAncestorsInner(sourceId, destNodesScope);
         }
 
         let sourceId = sourceNodeScope.$modelValue.id;
@@ -51,9 +56,9 @@ export default class TaskController {
   }
 
   getData(lang) {
-    Object.keys(this.data).map(e => {
-      this.$http.get(`data/data-${e}-${lang}.json`).then((response) => {
-        this.data[e] = angular.fromJson(response.data);
+    Object.keys(this.data).map(list => {
+      this.dataGetter.getData(list, lang).then((response) => {
+        this.data[list] = angular.fromJson(response.data);
       })
     });
   }
@@ -71,4 +76,4 @@ export default class TaskController {
   };
 }
 
-TaskController.$inject = ['$http', '$scope', '$rootScope'];
+TaskController.$inject = ['$scope', '$rootScope', 'dataGetter'];
