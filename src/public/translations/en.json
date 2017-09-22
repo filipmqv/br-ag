@@ -1,0 +1,15 @@
+{
+  "HELLO": "Hello",
+  "BUTTON_LANG_PL": "Polski",
+  "BUTTON_LANG_EN": "English",
+  "LEFT_LIST": "Left list",
+  "RIGHT_LIST": "Right list",
+  "EXPAND_ALL": "Expand all",
+  "COLLAPSE_ALL": "Collapse all",
+  "NAME": "Name",
+  "CODE": "Code",
+  "ABOUT": "About",
+  "CREATED": "Created",
+  "VARA": "Country",
+  "VARB": "Gender"
+}
