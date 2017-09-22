@@ -1,4 +1,3 @@
-'use strict';
 export default class LanguageSwitchController {
   constructor($rootScope, $translate) {
     this.$rootScope = $rootScope;

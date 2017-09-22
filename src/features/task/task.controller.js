@@ -1,9 +1,9 @@
-'use strict';
 export default class TaskController {
-  constructor($scope, $rootScope, dataGetter) {
+  constructor($scope, $rootScope, dataGetter, treeAccept) {
     this.$scope = $scope;
     this.$rootScope = $rootScope;
     this.dataGetter = dataGetter;
+    this.treeAccept = treeAccept;
 
     this.$rootScope.$on('$translateChangeSuccess', (event, data) => {
       let newLang = data.language;
@@ -11,44 +11,9 @@ export default class TaskController {
       this.getData(newLang);
     });
 
-    // options for left list - conditions to accept or reject node drop
+    // options for left list - conditions to accept or reject dropping the node
     this.leftTreeOptions = {
-      accept: (sourceNodeScope, destNodesScope, destIndex) => {
-        function isOutOfDepth(sourceNodeScope, destNodesScope) {
-          return destNodesScope.outOfDepth(sourceNodeScope)
-        }
-
-        // check destNode
-        function parentId(destNodesScope) {
-          if (destNodesScope.$nodeScope && destNodesScope.$nodeScope.$modelValue)
-             return destNodesScope.$nodeScope.$modelValue.id;
-          return -1;
-        }
-
-        function isParentIdSameAsSourceId(sourceId, destNodesScope) {
-          return parentId(destNodesScope) === sourceId;
-        }
-
-        // check recursively higher levels of parents (apart from direct destNde)
-        function isNodeInAncestorsInner(sourceId, node) {
-          if(node.$parentNodeScope) {
-            if (sourceId === node.$parentNodeScope.$modelValue.id) {
-              return true
-            } else {
-              return isNodeInAncestorsInner(sourceId, node.$parentNodeScope);
-            }
-          }
-        }
-
-        function isNodeInAncestors(sourceId, destNodesScope) {
-          return isParentIdSameAsSourceId(sourceId, destNodesScope) || isNodeInAncestorsInner(sourceId, destNodesScope);
-        }
-
-        let sourceId = sourceNodeScope.$modelValue.id;
-        return !isOutOfDepth(sourceNodeScope, destNodesScope) &&
-          !destNodesScope.isParent(sourceNodeScope) &&
-          !isNodeInAncestors(sourceId, destNodesScope);
-      }
+      accept: (sourceNodeScope, destNodesScope, destIndex) => treeAccept.acceptNode(sourceNodeScope, destNodesScope, destIndex)
     };
     this.selected = null;
     this.data = {'left': [], 'right': []};
@@ -76,4 +41,4 @@ export default class TaskController {
   };
 }
 
-TaskController.$inject = ['$scope', '$rootScope', 'dataGetter'];
+TaskController.$inject = ['$scope', '$rootScope', 'dataGetter', 'treeAccept'];
